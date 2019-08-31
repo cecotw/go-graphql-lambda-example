@@ -14,8 +14,8 @@ Resources:
         GetEvent:
           Type: Api
           Properties:
-            Path: /
-            Method: get
+            Path: /query
+            Method: post
 
 Outputs:
 
