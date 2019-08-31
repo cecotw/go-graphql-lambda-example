@@ -1,2 +1,6 @@
-main
 packaged.yaml
+**/*
+!**/*.go
+!**/
+!**/pkg/**
+!**/cmd/**

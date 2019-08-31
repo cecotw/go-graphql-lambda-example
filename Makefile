@@ -16,8 +16,8 @@ clean:
 install:
 	go get ./...
 
-main: ./function/main.go
-	go build -o $(OUTPUT) ./function/main.go
+main: ./cmd/graphql/main.go
+	go build -o $(OUTPUT) ./cmd/graphql/main.go
 
 # compile the code to run in Lambda (local or real)
 .PHONY: lambda
