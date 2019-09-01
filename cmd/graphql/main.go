@@ -1,14 +1,9 @@
 package main
 
 import (
-	"context"
-	"encoding/json"
-	"errors"
-	"log"
-
-	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	graphql "github.com/graph-gophers/graphql-go"
+	"github.com/cecotw/go-graphql-lambda-example/internal/app/graphql/resolvers"
+	"github.com/cecotw/go-graphql-lambda-example/internal/pkg/handler"
 )
 
 // Schema schema
@@ -26,99 +21,12 @@ var Schema = `
 	}
 `
 
-type person struct {
-	ID        graphql.ID
-	FirstName string
-	LastName  string
-}
-
-var people = []*person{
-	{
-		ID:        "1000",
-		FirstName: "Pedro",
-		LastName:  "Marquez",
-	},
-
-	{
-		ID:        "1001",
-		FirstName: "John",
-		LastName:  "Doe",
-	},
-}
-
-type personResolver struct {
-	p *person
-}
-
-func (r *personResolver) ID() graphql.ID {
-	return r.p.ID
-}
-
-func (r *personResolver) FirstName() string {
-	return r.p.FirstName
-}
-
-func (r *personResolver) LastName() *string {
-	return &r.p.LastName
-}
-
-// Resolver : Struct with all the resolver functions
-type resolver struct{}
-
-// Person : Resolver function for the "Person" query
-func (r *resolver) Person(args struct{ ID graphql.ID }) *personResolver {
-	if p := peopleData[args.ID]; p != nil {
-		return &personResolver{p}
-	}
-	return nil
-}
-
-var peopleData = make(map[graphql.ID]*person)
-
-var mainSchema *graphql.Schema
-
-var (
-	// ErrQueryNameNotProvided is thrown when a name is not provided
-	ErrQueryNameNotProvided = errors.New("no query was provided in the HTTP body")
-)
-
-// Handler is the Lambda function handler
-func Handler(context context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	log.Printf("Processing Lambda request %s\n", request.RequestContext.RequestID)
-	// If no query is provided in the HTTP request body, throw an error
-	if len(request.Body) < 1 {
-		return events.APIGatewayProxyResponse{}, ErrQueryNameNotProvided
-	}
-
-	var params struct {
-		Query         string                 `json:"query"`
-		OperationName string                 `json:"operationName"`
-		Variables     map[string]interface{} `json:"variables"`
-	}
-
-	if err := json.Unmarshal([]byte(request.Body), &params); err != nil {
-		log.Print("Could not decode body", err)
-	}
-
-	response := mainSchema.Exec(context, params.Query, params.OperationName, params.Variables)
-	responseJSON, err := json.Marshal(response)
-	if err != nil {
-		log.Print("Could not decode body")
-	}
-
-	return events.APIGatewayProxyResponse{
-		Body:       string(responseJSON),
-		StatusCode: 200,
-	}, nil
-}
+var graphql = new(handler.GraphQl)
 
 func init() {
-	for _, p := range people {
-		peopleData[p.ID] = p
-	}
-	mainSchema = graphql.MustParseSchema(Schema, &resolver{})
+	graphql.BuildSchema(Schema, &resolvers.QueryResolver{})
 }
 
 func main() {
-	lambda.Start(Handler)
+	lambda.Start(graphql.Lambda)
 }

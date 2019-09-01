@@ -1,4 +1,4 @@
-package graphql
+package handler
 
 import (
 	"context"
@@ -25,8 +25,8 @@ var (
 	ErrQueryNameNotProvided = errors.New("no query was provided in the HTTP body")
 )
 
-// LambdaHandler is the Lambda function handler
-func (g *GraphQl) LambdaHandler(context context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+// Lambda is the Lambda function handler
+func (g *GraphQl) Lambda(context context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	log.Printf("Processing Lambda request %s\n", request.RequestContext.RequestID)
 	// If no query is provided in the HTTP request body, throw an error
 	if len(request.Body) < 1 {
