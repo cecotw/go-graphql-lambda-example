@@ -1,8 +1,9 @@
+type Query{
+  person(id: ID!): Person
+}
+
 type Person{
   id: ID!
   firstName: String!
   lastName: String
-}
-type Query{
-  person(id: ID!): Person
 }
