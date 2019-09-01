@@ -4,27 +4,20 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/cecotw/go-graphql-lambda-example/internal/app/graphql/resolvers"
 	"github.com/cecotw/go-graphql-lambda-example/internal/pkg/handler"
+	"github.com/cecotw/go-graphql-lambda-example/internal/pkg/loader"
 )
-
-// Schema schema
-var Schema = `
-	schema {
-		query: Query
-	}
-	type Person{
-		id: ID!
-		firstName: String!
-		lastName: String
-	}
-	type Query{
-		person(id: ID!): Person
-	}
-`
 
 var graphql = new(handler.GraphQl)
 
 func init() {
-	graphql.BuildSchema(Schema, &resolvers.QueryResolver{})
+	var schemaLoader = &loader.Schema{
+		SchemaPaths: []string{
+			"./internal/app/graphql/schemas/schema.graphql",
+			"./internal/app/graphql/schemas/types/person.graphql",
+		},
+	}
+	var schema = schemaLoader.MergeSchema()
+	graphql.BuildSchema(schema, &resolvers.QueryResolver{})
 }
 
 func main() {
