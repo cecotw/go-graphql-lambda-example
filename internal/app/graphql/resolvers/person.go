@@ -1,6 +1,8 @@
 package resolvers
 
-import "github.com/graph-gophers/graphql-go"
+import (
+	"github.com/graph-gophers/graphql-go"
+)
 
 // Person : Resolver function for the "Person" query
 func (r *QueryResolver) Person(args struct{ ID graphql.ID }) *PersonResolver {
